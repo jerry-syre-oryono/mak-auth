@@ -63,6 +63,7 @@ define('MAX_VERIFICATION_ATTEMPTS', 3);
 // Mock API Configuration
 define('MOCK_API_URL', 'https://69b7a205ffbcd0286095ac67.mockapi.io/enrolled');
 define('MOCK_API_TIMEOUT', 10);
+define('WEBMAIL_CHECK_API_URL', 'https://api.example.com/check-webmail'); // Placeholder for database check API
 
 // Security Settings
 define('SESSION_TIMEOUT', 3600);
@@ -77,6 +78,65 @@ ini_set('error_log', __DIR__ . '/../logs/error.log');
 
 if (!is_dir(__DIR__ . '/../logs')) {
     mkdir(__DIR__ . '/../logs', 0755, true);
+}
+
+/**
+ * Checks if a webmail address already exists in the database.
+ * 
+ * As per instructions, database credentials will be available later via API.
+ * This function currently simulates the check.
+ */
+function checkWebmailExists($webmail) {
+    // Simulation: In a real scenario, this would call an API or query a database
+    // For now, it returns false (does not exist) unless specifically tested.
+    
+    /* Implementation placeholder for future API:
+    $url = WEBMAIL_CHECK_API_URL . "?email=" . urlencode($webmail);
+    $response = @file_get_contents($url);
+    if ($response !== false) {
+        $data = json_decode($response, true);
+        return isset($data['exists']) && $data['exists'] === true;
+    }
+    */
+
+    return false;
+}
+
+/**
+ * Generates a unique webmail based on student names and existence in DB.
+ * 
+ * Rules:
+ * 1. Default: firstname.lastname@students.mak.ac.ug
+ * 2. If 3 names: concatenate last 2 names into one for the lastname part.
+ * 3. If exists: take letters from lastname and put them before firstname.
+ */
+function generateUniqueWebmail($firstName, $lastName, $middleName = '') {
+    $firstName = strtolower(trim($firstName));
+    $lastName = strtolower(trim($lastName));
+    $middleName = strtolower(trim($middleName));
+
+    // Handle 3+ names: "concatenate the last 2 names into one"
+    // If middle name is present, we treat it as part of the last name part.
+    if (!empty($middleName)) {
+        $finalFirstName = $firstName;
+        $finalLastName = $middleName . $lastName;
+    } else {
+        $finalFirstName = $firstName;
+        $finalLastName = $lastName;
+    }
+
+    $domain = "@students.mak.ac.ug";
+    $webmail = "$finalFirstName.$finalLastName" . $domain;
+
+    // Check for existence and modify if necessary
+    $i = 0;
+    while (checkWebmailExists($webmail) && $i < strlen($finalLastName)) {
+        $i++;
+        $prefix = substr($finalLastName, 0, $i);
+        $webmail = $prefix . $finalFirstName . "." . $finalLastName . $domain;
+    }
+
+    return $webmail;
 }
 
 /**

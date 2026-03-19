@@ -91,13 +91,15 @@ try {
         exit;
     }
 
-    // Generate webmail
-    $firstName = strtolower(trim($foundStudent['Firstname']));
-    $lastName = strtolower(trim($foundStudent['Lastname']));
-    $webmail = "$firstName.$lastName@students.mak.ac.ug";
+    // Generate unique webmail using the helper function
+    $webmail = generateUniqueWebmail(
+        $foundStudent['Firstname'], 
+        $foundStudent['Lastname'], 
+        $foundStudent['Middlename'] ?? ''
+    );
 
     // Success - return student data
-    logMessage("Student validated successfully. ID: $studentId", 'info');
+    logMessage("Student validated successfully. ID: $studentId. Generated webmail: $webmail", 'info');
     echo json_encode([
         'success' => true,
         'message' => 'Student found. Please provide an alternative email.',

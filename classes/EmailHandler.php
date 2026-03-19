@@ -54,8 +54,11 @@ class EmailHandler
             $this->mailer->SMTPSecure = SMTP_ENCRYPTION === 'ssl' ? \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS : \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
             $this->mailer->setFrom(FROM_EMAIL, FROM_NAME);
             
-            // Disable debug output for production
-            $this->mailer->SMTPDebug = 0; 
+            // Enable debug output temporarily
+            $this->mailer->SMTPDebug = 2; 
+            $this->mailer->Debugoutput = function($str, $level) {
+                logMessage("SMTP Debug (Level $level): $str", 'debug');
+            };
         } catch (\Exception $e) {
             logMessage('SMTP configuration error: ' . $e->getMessage(), 'error');
             throw $e;
@@ -98,6 +101,7 @@ class EmailHandler
             // Set subject and HTML content
             $this->mailer->isHTML(true);
             $this->mailer->Subject = 'MAK-AUTH: Your Secure OTP Code';
+
             $this->mailer->Body = $this->generateOTPEmailTemplate($studentName, $studentId, $registrationNumber, $otpCode, $webmail);
             $this->mailer->AltBody = $this->generatePlainTextOTPTemplate($studentName, $otpCode);
 
@@ -170,17 +174,26 @@ class EmailHandler
             padding: 40px 20px;
             text-align: center;
         }
+        .university-name {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.9;
+        }
         .header h1 {
             color: #ffffff;
             margin: 0;
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 800;
             letter-spacing: -0.025em;
         }
         .header p {
             color: #d1fae5;
-            margin: 8px 0 0 0;
-            font-size: 14px;
+            margin: 4px 0 0 0;
+            font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.1em;
         }
@@ -265,6 +278,7 @@ class EmailHandler
     <div class="wrapper">
         <div class="container">
             <div class="header">
+                <div class="university-name">Makerere University</div>
                 <h1>MAK-AUTH</h1>
                 <p>Secure Student Verification</p>
             </div>
@@ -322,6 +336,7 @@ HTML;
     private function generatePlainTextOTPTemplate($studentName, $otpCode)
     {
         return <<<TEXT
+MAKERERE UNIVERSITY
 MAK-AUTH: OTP CODE
 Secure Authentication System
 

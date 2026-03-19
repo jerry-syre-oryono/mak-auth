@@ -1,0 +1,4 @@
+[18-Mar-2026 13:06:29 Africa/Kampala] PHP Fatal error:  Uncaught Error: Undefined constant "WEBMAIL_PASSWORD" in C:\xampp\htdocs\mak-auth\process\verify_token.php:124
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\mak-auth\process\verify_token.php on line 124

@@ -151,7 +151,7 @@ include __DIR__ . '/includes/header.php';
               id="regNumInput" 
               name="registrationNumber"
               class="screenshot-input green-focus-ring"
-              placeholder="e.g., 210009190"
+              placeholder="e.g., 21/U/9190"
               required
             />
           </div>

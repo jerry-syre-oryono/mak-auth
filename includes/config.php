@@ -115,8 +115,8 @@ function generateUniqueWebmail($firstName, $lastName, $middleName = '') {
     $lastName = strtolower(trim($lastName));
     $middleName = strtolower(trim($middleName));
 
-    // Handle 3+ names: "concatenate the last 2 names into one"
-    // If middle name is present, we treat it as part of the last name part.
+    // Handle 3 names: concatenate the last 2 names into one for the lastname part.
+    // If middle name exists, we treat it as part of the "last 2 names".
     if (!empty($middleName)) {
         $finalFirstName = $firstName;
         $finalLastName = $middleName . $lastName;
@@ -130,10 +130,23 @@ function generateUniqueWebmail($firstName, $lastName, $middleName = '') {
 
     // Check for existence and modify if necessary
     $i = 0;
-    while (checkWebmailExists($webmail) && $i < strlen($finalLastName)) {
+    while (checkWebmailExists($webmail)) {
         $i++;
-        $prefix = substr($finalLastName, 0, $i);
-        $webmail = $prefix . $finalFirstName . "." . $finalLastName . $domain;
+        if ($i <= strlen($finalLastName)) {
+            // "taking the first letter from the lastname and putting it before the firstname"
+            // Then the next letter, etc.
+            $prefix = substr($finalLastName, 0, $i);
+            $webmail = $prefix . $finalFirstName . "." . $finalLastName . $domain;
+        } else {
+            // If all letters of the lastname are exhausted as prefixes, 
+            // start appending numbers to the maximum letter version.
+            $suffixNum = $i - strlen($finalLastName);
+            $fullPrefix = $finalLastName;
+            $webmail = $fullPrefix . $finalFirstName . "." . $finalLastName . $suffixNum . $domain;
+        }
+        
+        // Safety break to prevent infinite loops if something goes wrong with checkWebmailExists
+        if ($i > 100) break; 
     }
 
     return $webmail;

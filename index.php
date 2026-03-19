@@ -409,22 +409,31 @@ include __DIR__ . '/includes/header.php';
                 </p>
               </div>
 
-            <div class="bg-white/80 border-l-4 border-emerald-600 rounded-lg p-4 space-y-3">
+            <div class="bg-white/80 border-l-4 border-emerald-600 rounded-lg p-4 space-y-4">
               <div>
-                <label class="block text-xs uppercase font-semibold text-gray-600 tracking-wide mb-1">
+                <label class="block text-xs uppercase font-semibold text-gray-600 tracking-wide mb-1.5">
                   <i class="fa-regular fa-envelope text-emerald-600 mr-1"></i>
                   Webmail Address
                 </label>
-                <input 
-                  type="text"
-                  id="credWebmail"
-                  class="w-full bg-gray-50 border border-gray-300 rounded px-3 py-2 font-mono text-emerald-700 font-semibold"
-                  readonly
-                />
+                <div class="flex flex-col sm:flex-row gap-2">
+                  <div 
+                    id="credWebmailDisplay"
+                    class="flex-1 bg-gray-50 border border-gray-300 rounded px-3 py-2.5 font-mono text-emerald-700 font-semibold break-all text-sm sm:text-base min-h-[42px] flex items-center"
+                  ></div>
+                  <button 
+                    type="button"
+                    id="copyWebmailBtn"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded transition-colors flex items-center justify-center gap-2 text-sm font-bold shadow-sm"
+                    title="Copy webmail address"
+                  >
+                    <i class="fa-regular fa-copy"></i>
+                    <span>COPY</span>
+                  </button>
+                </div>
               </div>
 
               <div>
-                <label class="block text-xs uppercase font-semibold text-gray-600 tracking-wide mb-1">
+                <label class="block text-xs uppercase font-semibold text-gray-600 tracking-wide mb-1.5">
                   <i class="fa-solid fa-key text-emerald-600 mr-1"></i>
                   Webmail Password
                 </label>
@@ -432,13 +441,13 @@ include __DIR__ . '/includes/header.php';
                   <input 
                     type="password"
                     id="credPassword"
-                    class="flex-1 bg-gray-50 border border-gray-300 rounded px-3 py-2 font-mono text-emerald-700 font-semibold"
+                    class="flex-1 bg-gray-50 border border-gray-300 rounded px-3 py-2.5 font-mono text-emerald-700 font-semibold text-sm sm:text-base"
                     readonly
                   />
                   <button 
                     type="button"
                     id="togglePasswordBtn"
-                    class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-3 py-2 rounded transition-colors"
+                    class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-4 py-2 rounded transition-colors"
                     title="Toggle password visibility"
                   >
                     <i class="fa-regular fa-eye"></i>
@@ -951,10 +960,10 @@ include __DIR__ . '/includes/header.php';
               if (credentialsSection) credentialsSection.classList.remove('hidden');
               
               if (currentStudent) {
-                const credWebmail = document.getElementById('credWebmail');
+                const credWebmailDisplay = document.getElementById('credWebmailDisplay');
                 const credPassword = document.getElementById('credPassword');
                 
-                if (credWebmail) credWebmail.value = currentStudent.webmail;
+                if (credWebmailDisplay) credWebmailDisplay.textContent = currentStudent.webmail;
                 if (credPassword) credPassword.value = password;
               }
               
@@ -968,6 +977,30 @@ include __DIR__ . '/includes/header.php';
           } finally {
             submitCreateWebmailBtn.disabled = false;
             submitCreateWebmailBtn.innerHTML = '<span>CREATE WEBMAIL</span><i class="fa-solid fa-plus text-white text-xl ml-2"></i>';
+          }
+        });
+      }
+
+      // NEW: Copy Webmail Logic
+      const copyWebmailBtn = document.getElementById('copyWebmailBtn');
+      if (copyWebmailBtn) {
+        copyWebmailBtn.addEventListener('click', () => {
+          const webmailText = document.getElementById('credWebmailDisplay').textContent;
+          if (webmailText) {
+            navigator.clipboard.writeText(webmailText).then(() => {
+              const originalContent = copyWebmailBtn.innerHTML;
+              copyWebmailBtn.innerHTML = '<i class="fa-solid fa-check"></i><span>COPIED!</span>';
+              copyWebmailBtn.classList.replace('bg-emerald-600', 'bg-blue-600');
+              
+              showToast('Webmail address copied to clipboard!');
+              
+              setTimeout(() => {
+                copyWebmailBtn.innerHTML = originalContent;
+                copyWebmailBtn.classList.replace('bg-blue-600', 'bg-emerald-600');
+              }, 2000);
+            }).catch(err => {
+              console.error('Could not copy text: ', err);
+            });
           }
         });
       }
